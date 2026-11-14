@@ -1,0 +1,15 @@
+{
+  "name": "maseno-timetable-worker",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Maseno University timetable generator, served at miltontech.co.ke/timetable by a Cloudflare Worker with Static Assets.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "node --check src/index.js && for f in public/js/*.js; do node --check $f || exit 1; done"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

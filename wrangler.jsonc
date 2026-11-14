@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "maseno-timetable-worker",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-14",
+  "assets": {
+    "directory": "./public",
+    // Serve ./public under https://miltontech.co.ke/timetable/
+    "base_path": "/timetable",
+    // Lets src/index.js hand non-redirected requests back to the static files
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // Run the Worker first for these paths only (slash redirect + legacy links)
+    "run_worker_first": ["/timetable", "/timetable.html", "/timetable/index.html"]
+  },
+  "routes": [
+    {
+      "pattern": "miltontech.co.ke/timetable*",
+      "zone_name": "miltontech.co.ke"
+    }
+  ]
+}

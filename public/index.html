@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maseno Timetable Generator | Milton Tech Solutions</title>
+<meta name="description" content="Free tool for Maseno University students to build class timetables, exam schedules, group discussion plans and study plans — with PDF, image, WhatsApp and Google Calendar export.">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+<link rel="apple-touch-icon" href="./assets/icon-192.png">
+<link rel="manifest" href="./manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="My Timetable">
+<meta property="og:title" content="Maseno Timetable Generator | Milton Tech Solutions">
+<meta property="og:description" content="Build class, exam, group and study timetables in seconds. Export to PDF, share on WhatsApp, sync to Google Calendar.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://miltontech.co.ke/timetable/">
+<meta property="og:image" content="https://miltontech.co.ke/android-chrome-512x512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://pkwgjhznnsmjyotectkq.supabase.co">
+<link rel="preconnect" href="https://kohcjexytasvrbyamzyu.supabase.co">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="./js/theme.js"></script>
+<link rel="stylesheet" href="./styles/variables.css">
+<link rel="stylesheet" href="./styles/main.css">
+<link rel="stylesheet" href="./styles/components.css">
+<!-- jsPDF + jspdf-autotable are loaded on demand as ES modules (see exporter.js) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer crossorigin="anonymous"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+<header id="siteHeader" class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="./" title="Reload">
+      <span class="brand-mark"><img src="./assets/logo.svg" alt="" width="28" height="28"></span>
+      <span class="brand-text"><b>Milton Tech</b><i>Timetable</i></span>
+    </a>
+    <div class="header-actions">
+      <button type="button" class="kbd-hint" onclick="setupPaletteFocus()" aria-label="Search units (Ctrl K)"><span>Search units</span><kbd>Ctrl K</kbd></button>
+      <span class="pill pill-free">Free · No login</span>
+      <button type="button" class="icon-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="ic-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="ic-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="seg-wrap">
+    <div class="seg-tabs" id="segTabs" role="tablist" aria-label="Timetable type">
+<button type="button" class="seg-tab" role="tab" id="tab-class" data-mode="class" aria-selected="false" aria-controls="classApp" onclick="selectMode('class')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg><span class="seg-long">Class Timetable</span><span class="seg-short">Class</span></button>
+<button type="button" class="seg-tab" role="tab" id="tab-exam" data-mode="exam" aria-selected="false" aria-controls="examApp" onclick="selectMode('exam')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6a2 2 0 0 1 2 2v14H7V6a2 2 0 0 1 2-2z"/><path d="M10 9h4M10 13h4M10 17h2"/></svg><span class="seg-long">Exam Timetable</span><span class="seg-short">Exams</span></button>
+<button type="button" class="seg-tab" role="tab" id="tab-group" data-mode="group" aria-selected="false" aria-controls="groupApp" onclick="selectMode('group')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14a5 5 0 0 1 5 5"/></svg><span class="seg-long">Group Discussions</span><span class="seg-short">Groups</span></button>
+<button type="button" class="seg-tab" role="tab" id="tab-personal" data-mode="personal" aria-selected="false" aria-controls="personalApp" onclick="selectMode('personal')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M7 11v5c0 1.5 2.5 3 5 3s5-1.5 5-3v-5"/></svg><span class="seg-long">Personal CAT / Study</span><span class="seg-short">Study</span></button>
+<button type="button" class="seg-tab" role="tab" id="tab-planner" data-mode="planner" aria-selected="false" aria-controls="plannerApp" onclick="selectMode('planner')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="seg-long">Personal Planner</span><span class="seg-short">Planner</span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="app-main">
+<!-- ── Class Timetable App ── -->
+<section id="classApp" class="mode-panel" role="tabpanel" aria-labelledby="tab-class" style="display:none">
+
+<div class="hero">
+  <h1>Build your <span class="hl">Class Timetable</span><br>in seconds.</h1>
+  <p>Search and select your semester units — or add them manually if a unit isn't listed — preview conflicts, and export your timetable as a PDF, image, or shareable link. Share it on WhatsApp, or sync it to Google Calendar for a 30-minute reminder before every class.</p>
+</div>
+
+<div class="main">
+
+  <!-- Step 1: Name -->
+  <div class="card">
+    <div class="step-indicator">
+      <div class="step-dot active">1</div>
+      <div class="step-label">Step 1 — Your Details (Optional)</div>
+    </div>
+    <div class="name-row">
+      <input type="text" id="studentName" placeholder="Your full name…" oninput="saveDraft('mts_draft_class', { units: selectedUnits, name: this.value.trim() })" />
+    </div>
+    <div class="row-wrap">
+      <div class="col">
+        <select id="studentYear">
+          <option value="">Year (optional)</option>
+          <option value="1">Year 1</option>
+          <option value="2">Year 2</option>
+          <option value="3">Year 3</option>
+          <option value="4">Year 4</option>
+          <option value="5">Year 5</option>
+          <option value="6">Year 6</option>
+        </select>
+      </div>
+      <div class="col col-2">
+        <input type="text" id="studentDept" placeholder="School / Department (optional)…" />
+      </div>
+    </div>
+    <div class="row-wrap">
+      <div class="col">
+        <select id="studentSemester" disabled>
+          <option value="1" selected>Semester 1</option>
+        </select>
+      </div>
+      <div class="col">
+        <input type="text" id="studentAcadYear" value="2026/2027" readonly />
+      </div>
+    </div>
+    <div class="hint">Semester 1 is set for the current academic year — other fields are optional and appear on your PDF timetable.</div>
+    <div class="hint hint-accent" data-cfg="classesRunNotice"></div>
+  </div>
+
+  <!-- Step 2: Units -->
+  <div class="card">
+    <div class="step-indicator">
+      <div class="step-dot active">2</div>
+      <div class="step-label">Step 2 — Search, Select &amp; Add Your Units</div>
+    </div>
+    <div class="callout">
+      <span>💡</span>
+      <p><strong>Already synced a class timetable?</strong> Import it below to edit it directly, instead of searching or re-adding units by hand.</p>
+    </div>
+    <button type="button" class="btn-gcal center" onclick="loadClassFromGCal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/></svg>
+      Import from Google Calendar
+    </button>
+    <div id="classGCalStatus" class="hint" style="display:none"></div>
+    <div id="classNoSyncNotice" class="callout" style="display:none">
+      <p>No previously synced classes were found in your Google Calendar. Sync a class timetable first, then come back here to import and edit it — or just add units below.</p>
+    </div>
+    <div class="exam-search-divider">OR</div>
+
+    <div class="callout callout-warn" id="searchNotice"><span class="callout-ic">🔍</span><p data-notice-text></p></div>
+
+    <div class="search-skeleton-label" id="searchSkeletonLabel">⏳ Loading unit database…</div>
+    <div class="search-skeleton" id="searchSkeleton"></div>
+    <div class="search-wrap" id="searchWrap" style="display:none">
+      <input type="text" id="unitSearch" placeholder="Search by unit name or code…" autocomplete="off" />
+      <div class="dropdown" id="dropdown"></div>
+    </div>
+
+    <div class="exam-search-divider">OR</div>
+    <button type="button" class="btn-manual-add" onclick="toggleManual()">
+      + Add unit manually (not in list?)
+    </button>
+    <div class="manual-form" id="manualForm">
+      <div class="manual-grid">
+        <div>
+          <label>Unit Code</label>
+          <input type="text" id="mCode" placeholder="e.g. MAT 405" />
+        </div>
+        <div>
+          <label>Unit Name</label>
+          <input type="text" id="mName" placeholder="e.g. Topology" />
+        </div>
+      </div>
+      <div class="manual-grid-3">
+        <div>
+          <label>Day</label>
+          <select id="mDay">
+            <option value="">Select day</option>
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+            <option>Saturday</option>
+          </select>
+        </div>
+        <div>
+          <label>Start Time</label>
+          <select id="mStartHour" onchange="updateTimePreview()">
+            <option value="">Select start</option>
+            <option value="7">7:00</option>
+            <option value="7.5">7:30</option>
+            <option value="8">8:00</option>
+            <option value="8.5">8:30</option>
+            <option value="9">9:00</option>
+            <option value="9.5">9:30</option>
+            <option value="10">10:00</option>
+            <option value="10.5">10:30</option>
+            <option value="11">11:00</option>
+            <option value="11.5">11:30</option>
+            <option value="12">12:00</option>
+            <option value="12.5">12:30</option>
+            <option value="13">13:00</option>
+            <option value="13.5">13:30</option>
+            <option value="14">14:00</option>
+            <option value="14.5">14:30</option>
+            <option value="15">15:00</option>
+            <option value="15.5">15:30</option>
+            <option value="16">16:00</option>
+            <option value="16.5">16:30</option>
+            <option value="17">17:00</option>
+            <option value="17.5">17:30</option>
+            <option value="18">18:00</option>
+            <option value="18.5">18:30</option>
+            <option value="19">19:00</option>
+            <option value="19.5">19:30</option>
+          </select>
+        </div>
+        <div>
+          <label>Venue</label>
+          <input type="text" id="mVenue" placeholder="e.g. LT5" />
+        </div>
+      </div>
+      <div>
+        <label>Lecturer <span>(Optional)</span></label>
+        <input type="text" id="mLecturer" placeholder="e.g. Dr. Otieno" />
+      </div>
+      <div>
+        <label>Duration</label>
+        <div class="dur-btns" id="mDurBtns">
+          <button type="button" class="dur-btn" data-dur="1" onclick="setDur(1)">1 hr</button>
+          <button type="button" class="dur-btn" data-dur="2" onclick="setDur(2)">2 hrs</button>
+          <button type="button" class="dur-btn active" data-dur="3" onclick="setDur(3)">3 hrs</button>
+          <button type="button" class="dur-btn" data-dur="4" onclick="setDur(4)">4 hrs</button>
+        </div>
+        <div id="mTimePreview"></div>
+      </div>
+      <button class="btn-add-manual" onclick="addManualUnit()">+ Add Unit</button>
+      <div class="manual-error" id="manualError"></div>
+    </div>
+
+    <div class="units-tags" id="unitTags"></div>
+    <div class="unit-count" id="unitCount">0 units selected · max 18</div>
+    <div class="hint">🎨 Tap the color dot on a unit to customize its color on your timetable and PDF.</div>
+    <div class="error-box" id="errorBox"></div>
+  </div>
+
+  <!-- Step 3: Generate -->
+  <div class="card">
+    <div class="step-indicator">
+      <div class="step-dot active">3</div>
+      <div class="step-label">Step 3 — Generate Timetable</div>
+    </div>
+    <button class="btn-primary" id="generateBtn" onclick="generate()">🗓 Build My Timetable</button>
+  </div>
+
+  <!-- Output -->
+  <div class="output-section" id="outputSection">
+
+    <div class="conflict-box" id="conflictBox">
+      <strong>⚠ Time Conflicts Detected</strong>
+      <ul id="conflictList"></ul>
+    </div>
+
+    <div class="unmatched-box" id="unmatchedBox"></div>
+
+    <div class="card output-card">
+      <div class="tt-header">
+        <img src="./assets/masenologo.png" alt="Maseno University" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='/masenologo.png'}else{this.style.display='none';this.dataset.failed=1}" />
+        <div class="tt-header-text">
+          <h2>Maseno University</h2>
+          <p id="outputTitle">Class Timetable</p>
+        </div>
+      </div>
+      <div class="summary-bar" id="summaryBar"></div>
+      <div class="scroll-hint">← scroll sideways →</div>
+      <div class="timetable-wrap" id="timetableGrid"></div>
+    </div>
+
+    <div class="funny-comment" id="funnyComment_class"></div>
+
+    <!-- Share Section -->
+    <div class="card link-section">
+      <div class="card-title">Share Your Timetable</div>
+      <div class="link-box">
+        <input type="text" id="shareLink" readonly />
+        <button class="copy-btn" id="copyBtn" onclick="copyLink()">Copy Editable Link</button>
+      </div>
+      <p class="hint">Opens with every unit pre-filled — anyone with the link can view it or edit their own copy.</p>
+      <div class="action-row">
+        <button class="btn-wa" onclick="withButtonBusy(this, 'Opening…', shareWA)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.121 1.535 5.853L.057 23.203a.75.75 0 00.906.919l5.487-1.442A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.886 0-3.655-.523-5.166-1.432l-.371-.22-3.849 1.012 1.036-3.748-.242-.386A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Share on WhatsApp
+        </button>
+        <button class="btn-outline" onclick="withButtonBusy(this, '⏳ Preparing…', downloadPDF)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+        <button class="btn-image" onclick="exportClassImage(this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Export as Image
+        </button>
+        <button class="btn-gcal" onclick="syncClassToGCal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/><path d="M9.75 16.5H8.25v-4.19l-1.28.87-.75-1.11 2.25-1.57h1.28v6z" fill="#4285F4"/><path d="M14.25 16.5h-4.12v-1.22l2.25-2.06c.41-.38.68-.68.68-1.09a.72.72 0 00-.75-.75.84.84 0 00-.84.9H10c.03-1.22.93-2.04 2.3-2.04 1.3 0 2.2.75 2.2 1.88 0 .84-.45 1.45-1.22 2.13l-1.4 1.28h2.37v1.97z" fill="#EA4335"/></svg>
+          Sync to Google Calendar
+        </button>
+        <button class="btn-outline" onclick="resetAll()">↩ Start Over</button>
+      </div>
+      <div id="lastSync_class" class="last-sync-label"></div>
+    </div>
+
+  </div>
+</div>
+
+</section><!-- end #classApp -->
+
+<!-- ── Examination Timetable App ── -->
+<section id="examApp" class="mode-panel" role="tabpanel" aria-labelledby="tab-exam" style="display:none">
+
+<div class="hero">
+  <h1>Build your <span class="hl">Exam Timetable</span><br>in seconds.</h1>
+  <p>Add your units with exam dates, times and venues, then export as a PDF, image, or shareable link — share it on WhatsApp, or sync it to Google Calendar for a 60-minute reminder before every exam.</p>
+</div>
+
+<div class="main">
+
+  <!-- Exam Step 1: Student details -->
+  <div class="card">
+    <div class="step-indicator">
+      <div class="step-dot active">1</div>
+      <div class="step-label">Step 1 — Your Details (Optional)</div>
+    </div>
+    <div class="name-row">
+      <input type="text" id="examStudentName" placeholder="Your full name…" oninput="saveExamDraftFields()" />
+    </div>
+    <div class="row-wrap">
+      <div class="col">
+        <select id="examStudentYear" onchange="saveExamDraftFields()">
+          <option value="">Year (optional)</option>
+          <option value="1">Year 1</option>
+          <option value="2">Year 2</option>
+          <option value="3">Year 3</option>
+          <option value="4">Year 4</option>
+          <option value="5">Year 5</option>
+          <option value="6">Year 6</option>
+        </select>
+      </div>
+      <div class="col col-2">
+        <input type="text" id="examStudentDept" placeholder="School / Department (optional)…" oninput="saveExamDraftFields()" />
+      </div>
+    </div>
+    <div class="row-wrap">
+      <div class="col">
+        <select id="examStudentSemester" disabled>
+          <option value="1" selected>Semester 1</option>
+        </select>
+      </div>
+      <div class="col">
+        <input type="text" id="examStudentAcadYear" value="2026/2027" readonly />
+      </div>
+    </div>
+    <div class="hint">Semester 1 is set for the current academic year — other fields are optional and appear on your PDF.</div>
+  </div>
+
+  <!-- Exam Step 2: Add exams -->
+  <div class="card">
+    <div class="step-indicator">
+      <div class="step-dot active">2</div>
+      <div class="step-label">Step 2 — Add Your Exam Units</div>
+    </div>
+
+    <div class="callout">
+      <span>💡</span>
+      <p><strong>Already synced an exam timetable?</strong> Import it below to edit it directly, instead of searching or re-entering exams by hand.</p>
+    </div>
+    <button type="button" class="btn-gcal center" onclick="loadExamFromGCal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/></svg>
+      Import from Google Calendar
+    </button>
+    <div id="examGCalStatus" class="hint" style="display:none"></div>
+    <div id="examNoSyncNotice" class="callout" style="display:none">
+      <p>No previously synced exams were found in your Google Calendar. Sync an exam timetable first, then come back here to import and edit it — or just add exams below.</p>
+    </div>
+
+    <div class="callout">
+      <span>🎓</span>
+      <p><strong>Already synced your class timetable?</strong> We can read the units from it and auto-find their exams for you.</p>
+    </div>
+    <button type="button" class="btn-gcal center" onclick="importExamsFromClassSchedule()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L2 8l10 5 10-5-10-5z" fill="#22c55e"/><path d="M6 10.5v4.5c0 1 2.7 3 6 3s6-2 6-3v-4.5" stroke="#22c55e" stroke-width="1.5" fill="none"/></svg>
+      Match Exams from My Class Schedule
+    </button>
+    <div id="examClassMatchStatus" class="hint" style="display:none"></div>
+    <div id="examClassNoSyncNotice" class="callout" style="display:none">
+      <p>No synced classes were found in your Google Calendar. Sync your class timetable first, then come back here — or add exams below.</p>
+    </div>
+
+    <div class="exam-search-divider">OR</div>
+
+    <!-- Exam DB Search -->
+    <div class="exam-db-status" id="examDbStatus">
+      <div class="exam-db-dot loading" id="examDbDot"></div>
+      <span id="examDbLabel">Connecting to exam database…</span>
+    </div>
+    <div class="exam-search-wrap">
+      <span class="exam-search-icon">🔍</span>
+      <input type="text" id="examUnitSearch" placeholder="Search exam by unit name or code…" autocomplete="off" oninput="examSearchInput(this.value)" onfocus="examSearchInput(this.value)" />
+      <div class="exam-dropdown" id="examDropdown"></div>
+    </div>
+
+    <div class="exam-search-divider">OR</div>
+    <button type="button" class="btn-manual-add" onclick="toggleExamManual()">
+      + Add exam manually (not in list?)
+    </button>
+    <div class="manual-form" id="examManualForm">
+    <div class="manual-grid">
+      <div>
+        <label>Unit Code</label>
+        <input type="text" id="eCode" placeholder="e.g. MAT 301" />
+      </div>
+      <div>
+        <label>Unit Name</label>
+        <input type="text" id="eName" placeholder="e.g. Complex Analysis" />
+      </div>
+    </div>
+
+    <div class="manual-grid-3">
+      <div>
+        <label>Exam Date</label>
+        <input type="date" id="eDate" />
+      </div>
+      <div>
+        <label>Session</label>
+        <select id="eStart">
+          <option value="">Select session</option>
+          <option value="morning">Morning · 8:30 – 11:30</option>
+          <option value="afternoon">Afternoon · 12:00 – 3:00</option>
+          <option value="evening">Evening · 3:30 – 6:30</option>
+        </select>
+      </div>
+      <div>
+        <label>Duration</label>
+        <select id="eDur">
+          <option value="2">2 hours</option>
+          <option value="3" selected>3 hours</option>
+          <option value="2.5">2.5 hours</option>
+          <option value="1.5">1.5 hours</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label>Venue</label>
+      <input type="text" id="eVenue" placeholder="e.g. Main Hall / LT1" />
+    </div>
+
+    <div class="manual-error" id="examError"></div>
+    <button class="btn-add-manual" onclick="addExamUnit()">+ Add Exam</button>
+    </div>
+
+    <div class="units-tags" id="examTags"></div>
+    <div class="unit-count" id="examCount">0 exams added</div>
+    <div class="hint">🎨 Tap the color dot on a unit to customize its color on your timetable and PDF.</div>
+  </div>
+
+  <!-- Exam Step 3: Generate -->
+  <div class="card">
+    <div class="step-indicator">
+      <div class="step-dot active">3</div>
+      <div class="step-label">Step 3 — Generate Exam Timetable</div>
+    </div>
+    <button class="btn-primary" id="examGenerateBtn" onclick="generateExam()">📋 Build My Exam Timetable</button>
+    <div id="examTargetError"></div>
+  </div>
+
+  <!-- Exam Output -->
+  <div class="output-section" id="examOutputSection">
+    <div class="conflict-box" id="examConflictBox">
+      <strong>⚠ Date/Time Conflicts Detected</strong>
+      <ul id="examConflictList"></ul>
+    </div>
+    <div class="card output-card">
+      <div class="tt-header">
+        <img src="./assets/masenologo.png" alt="Maseno University" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='/masenologo.png'}else{this.style.display='none';this.dataset.failed=1}" />
+        <div class="tt-header-text">
+          <h2>Maseno University</h2>
+          <p id="examOutputTitle">Examination Timetable</p>
+        </div>
+      </div>
+      <div class="summary-bar" id="examSummaryBar"></div>
+      <div class="scroll-hint">← scroll sideways →</div>
+      <div class="timetable-wrap" id="examGrid"></div>
+    </div>
+
+    <div class="card link-section">
+      <div class="card-title">Share Your Exam Timetable</div>
+      <div class="link-box">
+        <input type="text" id="examShareLink" readonly />
+        <button class="copy-btn" id="examCopyBtn" onclick="copyExamLink()">Copy Editable Link</button>
+      </div>
+      <p class="hint">Opens with every exam pre-filled — anyone with the link can view it or edit their own copy.</p>
+      <div class="action-row">
+        <button class="btn-wa" onclick="withButtonBusy(this, 'Opening…', examShareWA)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.121 1.535 5.853L.057 23.203a.75.75 0 00.906.919l5.487-1.442A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.886 0-3.655-.523-5.166-1.432l-.371-.22-3.849 1.012 1.036-3.748-.242-.386A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Share on WhatsApp
+        </button>
+        <button class="btn-outline" onclick="withButtonBusy(this, '⏳ Preparing…', examDownloadPDF)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+        <button class="btn-image" onclick="examExportImage(this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Export as Image
+        </button>
+        <button class="btn-gcal" onclick="syncExamToGCal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/><path d="M9.75 16.5H8.25v-4.19l-1.28.87-.75-1.11 2.25-1.57h1.28v6z" fill="#4285F4"/><path d="M14.25 16.5h-4.12v-1.22l2.25-2.06c.41-.38.68-.68.68-1.09a.72.72 0 00-.75-.75.84.84 0 00-.84.9H10c.03-1.22.93-2.04 2.3-2.04 1.3 0 2.2.75 2.2 1.88 0 .84-.45 1.45-1.22 2.13l-1.4 1.28h2.37v1.97z" fill="#EA4335"/></svg>
+          Sync to Google Calendar
+        </button>
+        <button class="btn-outline" onclick="resetExam()">↩ Start Over</button>
+      </div>
+      <div id="lastSync_exam" class="last-sync-label"></div>
+    </div>
+  </div>
+</div>
+
+</section><!-- end #examApp -->
+
+<!-- ── Group Discussion App ── -->
+<section id="groupApp" class="mode-panel" role="tabpanel" aria-labelledby="tab-group" style="display:none">
+<div class="hero">
+  <h1>Build your <span class="hl">Group Discussion Timetable</span><br>in seconds.</h1>
+  <p>Add your group members, then schedule discussion sessions at times that work for everyone — export as a PDF, image, or shareable link, share it on WhatsApp, or sync to Google Calendar for automatic reminders.</p>
+</div>
+<div class="main">
+
+  <!-- Step 1: Week -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">1</div><div class="step-label">Step 1 — Set Your Week</div></div>
+    <div>
+      <label>Week starting</label>
+      <input type="date" id="grpWeekStart" onchange="grpWeekChanged()" />
+      <div>
+        <label>Week ending (auto)</label>
+        <input type="date" id="grpWeekEnd" readonly />
+      </div>
+      <p class="hint">This timetable covers one week only. Come back and build a new one for each following week.</p>
+    </div>
+  </div>
+
+
+
+  <!-- Step 2: Group Members -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">2</div><div class="step-label">Step 2 — Add Group Members</div></div>
+    <div>
+      <input type="text" id="grpMemberName" placeholder="Full name…" />
+      <input type="text" id="grpMemberReg" placeholder="Reg. No. / Course (optional)…" />
+      <button onclick="grpAddMember()">+ Add</button>
+    </div>
+    <div id="grpMemberTags"></div>
+    <div id="grpMemberCount" class="hint">0 members added</div>
+  </div>
+
+  <!-- Step 3: Units -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">3</div><div class="step-label">Step 3 — Add Your Units</div></div>
+    <p class="hint">Add the unit codes and names you'll be discussing. Pull them in from Google Calendar, or add them manually below — only the code and name are needed.</p>
+    <button class="btn-gcal center" onclick="grpLoadFromGCal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/></svg>
+      Import from Google Calendar
+    </button>
+    <div id="grpGCalStatus" class="hint" style="display:none"></div>
+
+    <div id="grpNoSyncNotice" class="callout" style="display:none">
+      <p>No classes found in your Google Calendar this week. Build and sync a class timetable first, or just add your units manually below.</p>
+      <button class="btn-outline" onclick="selectMode('class')">🗓 Go to Class Timetable</button>
+    </div>
+
+    <div class="hint">
+      <div></div>or add manually<div></div>
+    </div>
+    <div>
+      <input type="text" id="grpManualCode" placeholder="Unit code e.g. MAT 301" />
+      <input type="text" id="grpManualName" placeholder="Unit name e.g. Linear Algebra" />
+      <button onclick="grpAddManualUnit()">+ Add Unit</button>
+    </div>
+    <div id="grpManualError"></div>
+
+    <div id="grpUnitTags"></div>
+    <div id="grpUnitCount" class="hint">0 units loaded</div>
+  </div>
+
+  <!-- Step 4: Add discussion sessions -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">4</div><div class="step-label">Step 4 — Build Your Group Schedule</div></div>
+
+    <div class="hint">
+      <div></div>add a discussion session<div></div>
+    </div>
+    <p class="hint">Pick a unit, the day, time and venue your group will meet, and a short note on what to cover.</p>
+    <div>
+      <select id="grpSessionUnit">
+        <option value="">Select a unit…</option>
+      </select>
+      <select id="grpSessionDay" onchange="grpSessionDayChanged()">
+        <option value="">Select a day…</option>
+        <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+      </select>
+    </div>
+    <div id="grpSessionDayDate"></div>
+    <div>
+      <select id="grpSessionStart"></select>
+      <select id="grpSessionDuration">
+        <option value="0.5">30 minutes</option>
+        <option value="1" selected>1 hour</option>
+        <option value="1.5">1.5 hours</option>
+        <option value="2">2 hours</option>
+        <option value="2.5">2.5 hours</option>
+        <option value="3">3 hours</option>
+      </select>
+      <input type="text" id="grpSessionVenue" placeholder="Venue e.g. Library Room 2" maxlength="60" />
+      <input type="text" id="grpSessionNotes" placeholder="Cover… (optional, short note)" maxlength="60" />
+    </div>
+    <button onclick="grpAddSession()">+ Add Discussion Session</button>
+    <p class="hint">Units come from Step 3 — add them manually or import from Google Calendar first.</p>
+    <div id="grpSessionError"></div>
+    <div id="grpSessionList"></div>
+  </div>
+
+  <div class="card">
+    <button class="btn-primary" id="grpGenerateBtn" onclick="grpBuildSchedule()">👥 Build Group Schedule</button>
+  </div>
+
+  <!-- Results -->
+  <div id="grpResults" style="display:none">
+    <div class="card">
+      <div class="card-title">Your Discussion Sessions</div>
+      <p class="hint">Your scheduled sessions are listed below, sorted by day and time. Tap any row above to edit it.</p>
+      <div class="scroll-hint">← scroll sideways →</div>
+      <div class="timetable-wrap" id="grpGrid"></div>
+      <div class="funny-comment" id="funnyComment_group"></div>
+      <div class="link-box">
+        <input type="text" id="grpShareLink" readonly />
+        <button class="copy-btn" id="grpCopyBtn" onclick="copyGroupLink()">Copy Editable Link</button>
+      </div>
+      <p class="hint">Opens with your group, units and sessions pre-filled — ready for members to view or edit.</p>
+      <div class="action-row">
+        <button class="btn-outline" onclick="withButtonBusy(this, '⏳ Preparing…', downloadGroupPDF)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+        <button class="btn-image" onclick="groupExportImage(this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Export as Image
+        </button>
+        <button class="btn-gcal" onclick="syncGroupToGCal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/></svg>
+          Sync to Google Calendar
+        </button>
+        <button class="btn-wa" onclick="withButtonBusy(this, 'Opening…', grpCopyWA)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.121 1.535 5.853L.057 23.203a.75.75 0 00.906.919l5.487-1.442A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.886 0-3.655-.523-5.166-1.432l-.371-.22-3.849 1.012 1.036-3.748-.242-.386A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Share on WhatsApp
+        </button>
+        <button class="btn-outline" onclick="grpClearSessions()">🗑 Clear Sessions</button>
+      </div>
+      <div id="lastSync_group" class="last-sync-label"></div>
+    </div>
+  </div>
+
+</div>
+</section><!-- end #groupApp -->
+
+<!-- ── Personal Study Timetable App ── -->
+<section id="personalApp" class="mode-panel" role="tabpanel" aria-labelledby="tab-personal" style="display:none">
+<img id="psLogoImg" src="./assets/masenologo.png" alt="" onerror="this.dataset.failed='1';" style="display:none" />
+<div class="hero">
+  <h1>Build your <span class="hl">Personal Study and CAT Timetable</span><br>your way.</h1>
+  <p>Import your unit codes and names from Google Calendar or add them manually, then schedule personal study sessions around them — plus track any CATs you have this week. Export as a PDF, image, or shareable link, share it on WhatsApp, or sync everything to Google Calendar with reminders.</p>
+</div>
+<div class="main">
+
+  <!-- Step 1: Personal Details -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">1</div><div class="step-label">Step 1 — Your Personal Details</div></div>
+    <p class="hint">These appear on your downloaded timetable so it's clearly yours.</p>
+    <div>
+      <label>Full Name</label>
+      <input type="text" id="psStudentName" placeholder="e.g. Jane Wanjiku" maxlength="60" oninput="savePersonalDraft()" />
+    </div>
+    <div class="ps-two-col">
+      <div>
+        <label>Registration Number</label>
+        <input type="text" id="psStudentReg" placeholder="e.g. SCI/00123/2023" maxlength="30" />
+      </div>
+      <div class="col">
+        <label>Year</label>
+        <select id="psStudentYear">
+          <option value="">Year (optional)</option>
+          <option value="Year 1">Year 1</option>
+          <option value="Year 2">Year 2</option>
+          <option value="Year 3">Year 3</option>
+          <option value="Year 4">Year 4</option>
+          <option value="Year 5">Year 5</option>
+          <option value="Year 6">Year 6</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label>Department / School</label>
+      <input type="text" id="psStudentDept" placeholder="e.g. School of Mathematics, Statistics and Actuarial Science" maxlength="80" />
+    </div>
+    <div>
+      <div class="col">
+        <label>Semester</label>
+        <select id="psStudentSemester" disabled>
+          <option value="Semester 1" selected>Semester 1</option>
+        </select>
+      </div>
+      <div class="col">
+        <label>Academic Year</label>
+        <input type="text" id="psStudentAcadYear" value="2026/2027" readonly />
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Time Range -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">2</div><div class="step-label">Step 2 — Set Your Daily Time Range</div></div>
+    <div>
+      <label>Week starting</label>
+      <input type="date" id="psWeekStart" onchange="psWeekChanged()" />
+      <div>
+        <label>Week ending (auto)</label>
+        <input type="date" id="psWeekEnd" readonly />
+      </div>
+      <p class="hint">This timetable covers one week only. Come back and build a new one for each following week.</p>
+    </div>
+    <div>
+      <label>Week Motto (optional)</label>
+      <input type="text" id="psWeekMotto" placeholder="e.g. Consistency beats intensity" maxlength="60" oninput="document.getElementById('psWeekMottoCount').textContent = this.value.length + '/60'" />
+      <div id="psWeekMottoCount" class="hint">0/60</div>
+    </div>
+    <div>
+      <div class="col">
+        <label>Day starts at</label>
+        <select id="psDayStart" onchange="psRenderSuggestedSlots()"></select>
+      </div>
+      <div class="col">
+        <label>Day ends at</label>
+        <select id="psDayEnd" onchange="psRenderSuggestedSlots()"></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Load Classes -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">3</div><div class="step-label">Step 3 — Add Your Units</div></div>
+    <p class="hint">Add the unit codes and names you're studying this week. Pull them in from Google Calendar, or add them manually below — only the code and name are needed.</p>
+    <button class="btn-gcal center" onclick="psLoadFromGCal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/></svg>
+      Import from Google Calendar
+    </button>
+    <div id="psGCalStatus" class="hint" style="display:none"></div>
+
+    <div id="psNoSyncNotice" class="callout" style="display:none">
+      <p>No classes found in your Google Calendar this week. Build and sync a class timetable first, or just add your units manually below.</p>
+      <button class="btn-outline" onclick="selectMode('class')">🗓 Go to Class Timetable</button>
+    </div>
+
+    <div class="hint">
+      <div></div>or add manually<div></div>
+    </div>
+    <div>
+      <input type="text" id="psManualCode" placeholder="Unit code e.g. MAT 301" />
+      <input type="text" id="psManualName" placeholder="Unit name e.g. Linear Algebra" />
+      <button onclick="psAddManualUnit()">+ Add Unit</button>
+    </div>
+    <div id="psManualError"></div>
+
+    <div id="psUnitTags"></div>
+    <div id="psUnitCount" class="hint">0 units loaded</div>
+  </div>
+
+  <!-- Step 3B: Import weekly schedule & suggest study times -->
+  <div class="card" id="psScheduleCard">
+    <div class="step-indicator"><div class="step-dot active">3B</div><div class="step-label">Step 3B — Your Weekly Schedule (Optional)</div></div>
+    <p class="hint">Import your Monday–Friday Google Calendar (classes, meetings, etc.) to get a quick summary and suggested free study times, based on your day start/end time from Step 2. This is just a guide — Saturday and Sunday are left free for you to plan, and nothing here is added to your timetable automatically.</p>
+    <button class="btn-gcal center" onclick="psImportWeeklySchedule()">
+      <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/></svg>
+      Import My Weekly Schedule
+    </button>
+    <div id="psScheduleStatus" class="hint" style="display:none"></div>
+
+    <div id="psWeeklySummary" style="display:none"></div>
+
+    <div id="psSuggestedSlotsWrap" style="display:none">
+      <div>💡 Suggested study times</div>
+      <div id="psSuggestedSlots"></div>
+      <p class="hint">Tap a time to pre-fill it in Step 4 below.</p>
+    </div>
+  </div>
+
+  <!-- Step 4: Add study sessions for free time -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">4</div><div class="step-label">Step 4 — Build Your Study Timetable</div></div>
+
+    <div class="hint">
+      <div></div>add a study session<div></div>
+    </div>
+    <p class="hint">Pick a unit, the day and start time, and how long you'll study — plus a short note on what to focus on.</p>
+    <div>
+      <select id="psBlockUnit">
+        <option value="">Select a unit…</option>
+      </select>
+      <select id="psBlockDay" onchange="psBlockDayChanged()">
+        <option value="">Select a day…</option>
+        <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+      </select>
+    </div>
+    <div id="psBlockDayDate"></div>
+    <div>
+      <select id="psBlockStart"></select>
+      <select id="psBlockDuration">
+        <option value="0.5">30 minutes</option>
+        <option value="1" selected>1 hour</option>
+        <option value="1.5">1 hour 30 minutes</option>
+        <option value="2">2 hours</option>
+        <option value="2.5">2 hours 30 minutes</option>
+        <option value="3">3 hours</option>
+      </select>
+      <input type="text" id="psBlockNotes" placeholder="Focus on… (optional, short note)" maxlength="60" />
+    </div>
+    <button onclick="psAddStudyBlock()">+ Add Study Session</button>
+    <p class="hint">Units come from Step 3 — add them manually or import from Google Calendar first.</p>
+    <div id="psTargetError"></div>
+    <div id="psSessionList"></div>
+  </div>
+
+  <!-- Step 5: CAT (Continuous Assessment Test) -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">5</div><div class="step-label">Step 5 — Any CATs This Week?</div></div>
+    <p class="hint">Do you have any upcoming sitting CAT this week?</p>
+    <div>
+      <button id="psCatYesBtn" onclick="psCatAnswer(true)">Yes</button>
+      <button id="psCatNoBtn" onclick="psCatAnswer(false)">No</button>
+    </div>
+
+    <div id="psCatForm" style="display:none">
+      <div>
+        <select id="psCatUnit">
+          <option value="">Select a unit…</option>
+        </select>
+        <input type="date" id="psCatDate" />
+      </div>
+      <div>
+        <input type="time" id="psCatTime" />
+        <select id="psCatDuration">
+          <option value="0.5">30 minutes</option>
+          <option value="1" selected>1 hour</option>
+          <option value="1.5">1 hour 30 minutes</option>
+          <option value="2">2 hours</option>
+        </select>
+        <input type="text" id="psCatVenue" placeholder="Venue e.g. LT 1" maxlength="60" />
+      </div>
+      <button onclick="psAddCAT()">+ Add CAT</button>
+      <p class="hint">Units come from Step 3 above. Each CAT is synced as a one-time event, clearly labeled and separate from your regular classes.</p>
+      <div id="psCatError"></div>
+      <div id="psCatList"></div>
+    </div>
+  </div>
+
+  <!-- Step 6: Quick checklist -->
+  <div class="card">
+    <div class="step-indicator"><div class="step-dot active">6</div><div class="step-label">Step 6 — Quick Checklist</div></div>
+    <p class="hint">A short list of things to get done this week (max 6 items).</p>
+    <div>
+      <input type="text" id="psChecklistInput" placeholder="e.g. Submit assignment" maxlength="40" />
+      <button onclick="psAddChecklistItem()">+ Add</button>
+    </div>
+    <div id="psChecklistError"></div>
+    <div id="psChecklistItems"></div>
+  </div>
+
+  <div class="card">
+    <button class="btn-primary" id="psGenerateBtn" onclick="psBuildTimetable()">🗓 Build My Timetable</button>
+  </div>
+
+
+  <!-- Personal timetable builder output -->
+  <div id="psResults" style="display:none">
+    <div class="card">
+      <div class="card-title">Your Study Sessions</div>
+      <p class="hint">Your study sessions are listed below, sorted by day and time. Tap any row to edit it, or use Step 4 above to add a new session.</p>
+      <div class="scroll-hint">← scroll sideways →</div>
+      <div class="timetable-wrap" id="psGrid"></div>
+      <div class="funny-comment" id="funnyComment_ps"></div>
+      <div class="link-box">
+        <input type="text" id="psShareLink" readonly />
+        <button class="copy-btn" id="psCopyBtn" onclick="copyPersonalLink()">Copy Editable Link</button>
+      </div>
+      <p class="hint">Opens with your units, sessions and checklist pre-filled — ready to view or edit.</p>
+      <div class="action-row">
+        <button class="btn-outline" onclick="withButtonBusy(this, '⏳ Preparing…', downloadPersonalPDF)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+        <button class="btn-image" onclick="personalExportImage(this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Export as Image
+        </button>
+        <button class="btn-gcal" onclick="syncPersonalToGCal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/></svg>
+          Sync to Google Calendar
+        </button>
+        <button class="btn-outline" onclick="psClearStudyBlocks()">🗑 Clear Study Blocks</button>
+        <button class="btn-wa" onclick="withButtonBusy(this, 'Opening…', psShareWA)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.121 1.535 5.853L.057 23.203a.75.75 0 00.906.919l5.487-1.442A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.886 0-3.655-.523-5.166-1.432l-.371-.22-3.849 1.012 1.036-3.748-.242-.386A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Share on WhatsApp
+        </button>
+      </div>
+      <div id="lastSync_personal" class="last-sync-label"></div>
+    </div>
+  </div>
+
+  <!-- Study block label modal -->
+  <div id="psModal" role="dialog" aria-modal="true" aria-labelledby="psModalTitle" style="display:none">
+    <div>
+      <div id="psModalTitle">Label this study block</div>
+      <div id="psModalSlotInfo" class="hint"></div>
+      <input type="text" id="psModalLabel" placeholder="e.g. Study: MAT 301, Revision…" />
+      <div>
+        <button onclick="psModalCancel()">Cancel</button>
+        <button onclick="psModalConfirm()">Save Block</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</section><!-- end #personalApp -->
+
+<!-- ── Personal Planner App ── -->
+<section id="plannerApp" class="mode-panel" role="tabpanel" aria-labelledby="tab-planner" style="display:none">
+
+<div class="hero">
+  <h1>Your <span class="hl">Personal Planner</span><br>for everything else.</h1>
+  <p>Birthdays, deadlines, meetings, appointments, travel — add any personal event, tag it with a category and priority, and set it to repeat daily, weekly, monthly or yearly. Search and filter your list, sync events to Google Calendar with a reminder, or pull existing Google Calendar events straight in. Everything is saved on this device — no account needed.</p>
+</div>
+
+<div class="main">
+
+  <!-- Planner Step 1: Add Event -->
+  <div class="card">
+    <div class="step-indicator">
+      <div class="step-dot active">1</div>
+      <div class="step-label">Add a Personal Event</div>
+    </div>
+
+    <div class="manual-grid">
+      <div>
+        <label>Event Title *</label>
+        <input type="text" id="plTitle" placeholder="e.g. Sherehe" />
+      </div>
+      <div>
+        <label>Date *</label>
+        <input type="date" id="plDate" />
+      </div>
+    </div>
+
+    <div class="manual-grid">
+      <div>
+        <label>Start Time</label>
+        <input type="time" id="plStart" />
+      </div>
+      <div>
+        <label>End Time</label>
+        <input type="time" id="plEnd" />
+      </div>
+    </div>
+
+    <div class="manual-grid">
+      <div>
+        <label>Category</label>
+        <select id="plCategory"></select>
+      </div>
+      <div>
+        <label>Priority</label>
+        <select id="plPriority"></select>
+      </div>
+    </div>
+
+    <div>
+      <label>Location (optional)</label>
+      <input type="text" id="plLocation" placeholder="e.g. Milton's House" />
+    </div>
+
+    <div>
+      <label>Notes (optional)</label>
+      <textarea id="plNotes" placeholder="Any extra details…" rows="2"></textarea>
+    </div>
+
+    <div>
+      <label>🔔 Reminder</label>
+      <select id="plReminder">
+        <option value="0">No reminder</option>
+        <option value="5">5 minutes before</option>
+        <option value="10">10 minutes before</option>
+        <option value="15">15 minutes before</option>
+        <option value="30" selected>30 minutes before</option>
+        <option value="60">1 hour before</option>
+        <option value="120">2 hours before</option>
+        <option value="1440">1 day before</option>
+        <option value="2880">2 days before</option>
+        <option value="10080">1 week before</option>
+      </select>
+    </div>
+
+    <div id="plRepeatWrap">
+      <label>🔁 Repeat</label>
+      <select id="plRepeat" onchange="plannerToggleRepeatUntil()">
+        <option value="none" selected>Does not repeat</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+      <div id="plRepeatUntilWrap" style="display:none">
+        <label>Repeat until</label>
+        <input type="date" id="plRepeatUntil" />
+        <div class="hint">Capped at 60 occurrences, whichever comes first.</div>
+      </div>
+      <div id="plRepeatEditNote" class="hint" style="display:none">This event is part of a repeating series. Editing here only changes this one occurrence.</div>
+    </div>
+
+    <div class="manual-error" id="plannerError"></div>
+    <div>
+      <button class="btn-add-manual" id="plAddBtn" onclick="addPlannerEvent()">+ Add Event</button>
+      <span id="plCancelEditBtn" onclick="cancelPlannerEdit()" class="hint" style="display:none">Cancel edit</span>
+    </div>
+  </div>
+
+  <!-- Planner Step 2: Your events -->
+  <div class="card">
+    <div class="step-indicator">
+      <div class="step-dot active">2</div>
+      <div class="step-label">Your Personal Events</div>
+    </div>
+    <div class="planner-filter-bar">
+      <input type="text" id="plSearch" placeholder="🔍 Search title, notes, location…" oninput="plannerApplyFiltersDebounced()" />
+      <select id="plFilterCategory" onchange="plannerApplyFilters()"></select>
+      <select id="plFilterPriority" onchange="plannerApplyFilters()"></select>
+      <span class="planner-filter-clear" onclick="plannerClearFilters()">Clear filters</span>
+    </div>
+    <div id="plannerList"></div>
+    <div class="unit-count" id="plannerCount">0 events</div>
+  </div>
+
+  <!-- Planner: Sync all -->
+  <div class="card link-section">
+    <div class="card-title">Sync Everything to Google Calendar</div>
+    <p class="hint">Each event gets its own reminder and is colour-coded so it's easy to spot in your calendar. You can also sync a single event straight from its card above.</p>
+    <div class="action-row">
+      <button class="btn-gcal" id="plannerSyncAllBtn" onclick="syncAllPlannerEvents()">
+        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3h-2.25V1.5h-1.5V3h-7.5V1.5h-1.5V3H4.5A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm0 16.5h-15V9h15v10.5zm0-12h-15V4.5h2.25V6h1.5V4.5h7.5V6h1.5V4.5h2.25V7.5z" fill="#4285F4"/></svg>
+        Sync All to Google Calendar
+      </button>
+    </div>
+    <div id="lastSync_planner" class="last-sync-label"></div>
+  </div>
+
+
+</div>
+
+</section><!-- end #plannerApp -->
+
+</main>
+
+<!-- Floating quick actions (shown once a timetable is built) -->
+<div class="quick-bar" id="quickBar" role="toolbar" aria-label="Quick actions">
+  <button type="button" class="qb-btn" data-q="pdf" onclick="quickAction('pdf', this)" title="Download PDF"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg><span>PDF</span></button>
+  <button type="button" class="qb-btn" data-q="png" onclick="quickAction('png', this)" title="Export as image"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>PNG</span></button>
+  <button type="button" class="qb-btn qb-wa" data-q="wa" onclick="quickAction('wa', this)" title="Share on WhatsApp"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1a7.5 7.5 0 0 1-3.7-3.2c-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5l-.9-2.1c-.2-.6-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.700 3.700 0 0 0-1.100 2.700c0 1.600 1.200 3.200 1.300 3.400s2.300 3.600 5.600 4.900c2 .8 2.800.9 3.800.7a3.200 3.200 0 0 0 2.100-1.500 2.600 2.600 0 0 0 .2-1.500c-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.600 15L2 22l5.200-1.400A10 10 0 1 0 12 2z"/></svg><span>WhatsApp</span></button>
+  <button type="button" class="qb-btn qb-gcal" data-q="gcal" onclick="quickAction('gcal', this)" title="Sync to Google Calendar"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg><span>Calendar</span></button>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="sf-brand"><b>Milton Tech KE</b><p>Free timetable tools built for Maseno University students.</p></div>
+    <div class="sf-links">
+      <a href="https://miltontech.co.ke" target="_blank" rel="noopener">miltontech.co.ke</a>
+      <a href="https://miltontech.co.ke/privacy.html" target="_blank" rel="noopener">Privacy</a>
+      <a href="https://miltontech.co.ke/terms.html" target="_blank" rel="noopener">Terms</a>
+      <a href="https://wa.me/254795624056?text=Hi%20Milton%2C%20I%20found%20your%20timetable%20tool%20and%20wanted%20to%20get%20in%20touch." target="_blank" rel="noopener">WhatsApp</a>
+      <a href="tel:0795624056">Call</a>
+    </div>
+    <p class="sf-copy">© 2026 Milton Tech KE. All rights reserved.</p>
+  </div>
+</footer>
+
+
+
+
+
+
+
+
+
+<!-- ── Edit / Confirm Unit Modal ── -->
+<div class="modal-backdrop" id="editModal" onclick="if(event.target===this)closeEditModal()" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+  <div class="modal-box">
+    <div class="modal-title" id="editModalTitle">Confirm Unit Details</div>
+    <div class="modal-sub">Review and edit the details before adding to your timetable.</div>
+    <div id="emDisclaimerBanner" class="callout callout-warn" style="display:none">
+      <span>⚠️</span>
+      <span>Tentative Class Schedule: Times and venues may change. If a change occurs, please ensure you update your schedule.</span>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Unit Code</label>
+        <input type="text" id="emCode" placeholder="e.g. MAT 101" />
+      </div>
+      <div class="modal-field">
+        <label>Unit Name</label>
+        <input type="text" id="emName" placeholder="e.g. Calculus I" />
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Day</label>
+        <select id="emDay">
+          <option value="">Select day</option>
+          <option>Monday</option>
+          <option>Tuesday</option>
+          <option>Wednesday</option>
+          <option>Thursday</option>
+          <option>Friday</option>
+          <option>Saturday</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Start Time</label>
+        <select id="emStart" onchange="updateEditPreview()">
+          <option value="">Select start</option>
+          <option value="7">7:00</option>
+          <option value="7.5">7:30</option>
+          <option value="8">8:00</option>
+          <option value="8.5">8:30</option>
+          <option value="9">9:00</option>
+          <option value="9.5">9:30</option>
+          <option value="10">10:00</option>
+          <option value="10.5">10:30</option>
+          <option value="11">11:00</option>
+          <option value="11.5">11:30</option>
+          <option value="12">12:00</option>
+          <option value="12.5">12:30</option>
+          <option value="13">13:00</option>
+          <option value="13.5">13:30</option>
+          <option value="14">14:00</option>
+          <option value="14.5">14:30</option>
+          <option value="15">15:00</option>
+          <option value="15.5">15:30</option>
+          <option value="16">16:00</option>
+          <option value="16.5">16:30</option>
+          <option value="17">17:00</option>
+          <option value="17.5">17:30</option>
+          <option value="18">18:00</option>
+          <option value="18.5">18:30</option>
+          <option value="19">19:00</option>
+          <option value="19.5">19:30</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>End Time</label>
+        <select id="emEnd" onchange="updateEditPreview()">
+          <option value="">Select end</option>
+          <option value="7.5">7:30</option>
+          <option value="8">8:00</option>
+          <option value="8.5">8:30</option>
+          <option value="9">9:00</option>
+          <option value="9.5">9:30</option>
+          <option value="10">10:00</option>
+          <option value="10.5">10:30</option>
+          <option value="11">11:00</option>
+          <option value="11.5">11:30</option>
+          <option value="12">12:00</option>
+          <option value="12.5">12:30</option>
+          <option value="13">13:00</option>
+          <option value="13.5">13:30</option>
+          <option value="14">14:00</option>
+          <option value="14.5">14:30</option>
+          <option value="15">15:00</option>
+          <option value="15.5">15:30</option>
+          <option value="16">16:00</option>
+          <option value="16.5">16:30</option>
+          <option value="17">17:00</option>
+          <option value="17.5">17:30</option>
+          <option value="18">18:00</option>
+          <option value="18.5">18:30</option>
+          <option value="19">19:00</option>
+          <option value="19.5">19:30</option>
+          <option value="20">20:00</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Venue</label>
+        <input type="text" id="emVenue" placeholder="e.g. LT1" />
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Lecturer <span class="hint">(Optional)</span></label>
+      <input type="text" id="emLecturer" placeholder="e.g. Dr. Otieno" />
+    </div>
+    <div id="emPreview"></div>
+    <div id="emError" class="modal-error"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmAdd()">Add to Timetable</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="multiEditModal" onclick="if(event.target===this)closeMultiEditModal()" role="dialog" aria-modal="true" aria-labelledby="multiEditModalTitle">
+  <div class="modal-box">
+    <div class="modal-title" id="multiEditModalTitle">Confirm Class Details</div>
+    <div class="modal-sub">This unit has <span id="meCount">0</span> classes. Review, edit, or remove any before adding them to your timetable.</div>
+    <div id="meDisclaimerBanner" class="callout callout-warn">
+      <span>⚠️</span>
+      <span>Tentative Class Schedule: Times and venues may change. If a change occurs, please ensure you update your schedule.</span>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Unit Code</label>
+        <input type="text" id="meCode" placeholder="e.g. MAT 101" />
+      </div>
+      <div class="modal-field">
+        <label>Unit Name</label>
+        <input type="text" id="meName" placeholder="e.g. Calculus I" />
+      </div>
+    </div>
+    <div id="meRows"></div>
+    <div id="meError" class="modal-error"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeMultiEditModal()">Cancel</button>
+      <button class="btn-primary" id="meAddBtn" onclick="confirmMultiAdd()">Add to Timetable</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Exam Confirm / Edit Modal ── -->
+<div class="modal-backdrop" id="examEditModal" onclick="if(event.target===this)closeExamEditModal()" role="dialog" aria-modal="true" aria-labelledby="examEditModalTitle">
+  <div class="modal-box">
+    <div class="modal-title" id="examEditModalTitle">Confirm Exam Details</div>
+    <div class="modal-sub">Review and edit the details before adding to your exam timetable.</div>
+    <div id="exmDisclaimerBanner" class="callout callout-warn" style="display:none">
+      <span>⚠️</span>
+      <span>Tentative Exam Schedule: Dates and venues are subject to revision. If changes occur, please remember to update your schedule.</span>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Unit Code</label>
+        <input type="text" id="exmCode" placeholder="e.g. CSC 301" />
+      </div>
+      <div class="modal-field">
+        <label>Unit Name</label>
+        <input type="text" id="exmName" placeholder="e.g. Data Structures" />
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Exam Date</label>
+        <input type="date" id="exmDate" />
+      </div>
+      <div class="modal-field">
+        <label>Session</label>
+        <select id="exmStart">
+          <option value="">Select session</option>
+          <option value="morning">Morning · 8:30 – 11:30</option>
+          <option value="afternoon">Afternoon · 12:00 – 3:00</option>
+          <option value="evening">Evening · 3:30 – 6:30</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Duration</label>
+        <select id="exmDur">
+          <option value="2">2 hours</option>
+          <option value="3" selected>3 hours</option>
+          <option value="2.5">2.5 hours</option>
+          <option value="1.5">1.5 hours</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Venue</label>
+        <input type="text" id="exmVenue" placeholder="e.g. Main Hall" />
+      </div>
+    </div>
+    <div id="exmError"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeExamEditModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmExamAdd()">Add to Timetable</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+<div class="pwa-banner" id="pwaBanner">
+  <img class="pwa-banner-icon" src="./assets/icon-192.png" alt="" width="40" height="40">
+  <div class="pwa-banner-text" id="pwaBannerText"><b>Install this app</b><span>Add it to your home screen for quick access.</span></div>
+  <div class="pwa-banner-actions">
+    <button class="pwa-banner-install" id="pwaBannerInstall">Install</button>
+    <button class="pwa-banner-close" id="pwaBannerClose" title="Dismiss" aria-label="Dismiss">✕</button>
+  </div>
+</div>
+
+<div id="onboardModal" role="dialog" aria-modal="true" aria-labelledby="onboardTitle">
+  <div class="onboard-box">
+    <div class="onboard-title" id="onboardTitle">👋 Welcome to the Maseno Timetable Generator</div>
+    <div class="onboard-steps">
+      <div class="onboard-step"><span class="oi">🗓</span><span><b>Pick a tool</b> — Class, Exam, Group Discussion or Personal Study. Each one builds a different kind of schedule.</span></div>
+      <div class="onboard-step"><span class="oi">📤</span><span><b>Share your result</b> — every timetable can be downloaded as a PDF, sent on WhatsApp, or shared as an editable link.</span></div>
+      <div class="onboard-step"><span class="oi">🔔</span><span><b>Never miss a class</b> — sync any timetable to Google Calendar for automatic reminders, even offline.</span></div>
+    </div>
+    <button class="btn-primary" onclick="dismissOnboarding()">Got it, let's start</button>
+  </div>
+</div>
+
+
+<script defer src="./js/config.js"></script>
+<script defer src="./js/commentary.js"></script>
+<script defer src="./js/supabase.js"></script>
+<script defer src="./js/exporter.js"></script>
+<script defer src="./js/gcal.js"></script>
+<script defer src="./js/planner.js"></script>
+<script defer src="./js/study.js"></script>
+<script defer src="./js/exam.js"></script>
+<script defer src="./js/app.js"></script>
+</body>
+</html>

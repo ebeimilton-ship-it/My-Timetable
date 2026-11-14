@@ -1,0 +1,198 @@
+/* ──────────────────────────────────────────────────────────────
+   variables.css — design tokens (light + dark)
+   Surfaces: --bg (page) → --surface (cards) → --surface2 (insets)
+   Theme is chosen by the OS; [data-theme] overrides it (set by the
+   header toggle, stored in localStorage by js/theme.js).
+   Legacy names (--accent2, --tag-bg …) are kept because some
+   JS-generated markup still references them.
+   ────────────────────────────────────────────────────────────── */
+
+:root {
+  color-scheme: light;
+
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Outfit', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --fs-2xs: 0.6875rem;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-md: 0.9375rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: clamp(1.6rem, 1.2rem + 2vw, 2.4rem);
+
+  /* Surfaces */
+  --bg: #f6f6f7;
+  --surface: #ffffff;
+  --surface2: #f1f2f4;
+  --surface-glass: rgba(255, 255, 255, 0.72);
+  --overlay: rgba(15, 17, 23, 0.45);
+
+  /* Text */
+  --text: #14161b;
+  --text-soft: #3b4048;
+  --muted: #6b7280;
+
+  /* Lines */
+  --border: #e4e5e9;
+  --border-strong: #cfd2d8;
+
+  /* Brand (Milton Tech orange) */
+  --brand: #ea580c;
+  --brand-hover: #c2410c;
+  --brand-soft: #fff1e6;
+  --brand-ring: rgba(234, 88, 12, 0.28);
+  --on-brand: #ffffff;
+  --accent: #d97706;
+  --accent2: #c2410c;
+  --accent3: #f59e0b;
+
+  /* Status */
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --danger-border: #fecaca;
+  --success: #16a34a;
+  --success-soft: #f0fdf4;
+  --warn: #d97706;
+  --warn-soft: #fffbeb;
+  --warn-border: #fde68a;
+  --info: #2563eb;
+  --whatsapp: #16a34a;
+
+  /* Legacy aliases */
+  --tag-bg: #fff7ed;
+  --tag-border: #fdba74;
+  --warn-box-bg: #fef3c7;
+  --warn-box-text: #92400e;
+  --danger-box-bg: #fee2e2;
+  --danger-box-text: #991b1b;
+
+  /* Shape */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+
+  /* Elevation */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.07), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 6px 16px -4px rgba(16, 24, 40, 0.1), 0 2px 6px -2px rgba(16, 24, 40, 0.06);
+  --shadow-lg: 0 18px 40px -12px rgba(16, 24, 40, 0.22), 0 6px 14px -6px rgba(16, 24, 40, 0.1);
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --t-fast: 120ms;
+  --t-med: 220ms;
+
+  /* Layout */
+  --content-w: 960px;
+  --gutter: clamp(14px, 4vw, 24px);
+  --touch: 44px;
+  --hour-h: 64px;
+}
+
+/* Dark theme — OS preference unless the user picked light */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #0b0d12;
+    --surface: #12151c;
+    --surface2: #1a1e27;
+    --surface-glass: rgba(18, 21, 28, 0.72);
+    --overlay: rgba(0, 0, 0, 0.62);
+    --text: #eceef2;
+    --text-soft: #c4c8d0;
+    --muted: #8d94a3;
+    --border: #232834;
+    --border-strong: #323948;
+    --brand: #fb923c;
+    --brand-hover: #fdba74;
+    --brand-soft: rgba(251, 146, 60, 0.12);
+    --brand-ring: rgba(251, 146, 60, 0.35);
+    --on-brand: #1a0f05;
+    --accent: #fb923c;
+    --accent2: #fdba74;
+    --accent3: #fbbf24;
+    --danger: #f87171;
+    --danger-soft: rgba(248, 113, 113, 0.1);
+    --danger-border: rgba(248, 113, 113, 0.35);
+    --success: #4ade80;
+    --success-soft: rgba(74, 222, 128, 0.1);
+    --warn: #fbbf24;
+    --warn-soft: rgba(251, 191, 36, 0.1);
+    --warn-border: rgba(251, 191, 36, 0.35);
+    --info: #60a5fa;
+    --tag-bg: rgba(251, 146, 60, 0.1);
+    --tag-border: rgba(251, 146, 60, 0.35);
+    --warn-box-bg: rgba(251, 191, 36, 0.12);
+    --warn-box-text: #fde68a;
+    --danger-box-bg: rgba(248, 113, 113, 0.12);
+    --danger-box-text: #fecaca;
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 8px 20px -6px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 22px 48px -14px rgba(0, 0, 0, 0.75);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface2: #1a1e27;
+  --surface-glass: rgba(18, 21, 28, 0.72);
+  --overlay: rgba(0, 0, 0, 0.62);
+  --text: #eceef2;
+  --text-soft: #c4c8d0;
+  --muted: #8d94a3;
+  --border: #232834;
+  --border-strong: #323948;
+  --brand: #fb923c;
+  --brand-hover: #fdba74;
+  --brand-soft: rgba(251, 146, 60, 0.12);
+  --brand-ring: rgba(251, 146, 60, 0.35);
+  --on-brand: #1a0f05;
+  --accent: #fb923c;
+  --accent2: #fdba74;
+  --accent3: #fbbf24;
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.1);
+  --danger-border: rgba(248, 113, 113, 0.35);
+  --success: #4ade80;
+  --success-soft: rgba(74, 222, 128, 0.1);
+  --warn: #fbbf24;
+  --warn-soft: rgba(251, 191, 36, 0.1);
+  --warn-border: rgba(251, 191, 36, 0.35);
+  --info: #60a5fa;
+  --tag-bg: rgba(251, 146, 60, 0.1);
+  --tag-border: rgba(251, 146, 60, 0.35);
+  --warn-box-bg: rgba(251, 191, 36, 0.12);
+  --warn-box-text: #fde68a;
+  --danger-box-bg: rgba(248, 113, 113, 0.12);
+  --danger-box-text: #fecaca;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 20px -6px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 22px 48px -14px rgba(0, 0, 0, 0.75);
+}
+
+/* Forced-light scope — used when rendering PNG exports */
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f6f6f7;
+  --surface: #ffffff;
+  --surface2: #f1f2f4;
+  --text: #14161b;
+  --text-soft: #3b4048;
+  --muted: #6b7280;
+  --border: #e4e5e9;
+  --border-strong: #cfd2d8;
+  --brand: #ea580c;
+  --accent: #d97706;
+  --accent2: #c2410c;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --danger-border: #fecaca;
+}
